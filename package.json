@@ -1,0 +1,26 @@
+{
+  "name": "backended-em",
+  "version": "1.0.0",
+  "description": "Employee Mgmt System",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BohdiCave/BackEnded-EM.git"
+  },
+  "author": "BohdiCave",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BohdiCave/BackEnded-EM/issues"
+  },
+  "homepage": "https://github.com/BohdiCave/BackEnded-EM#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "express": "^4.17.1",
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1"
+  }
+}
