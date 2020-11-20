@@ -1,9 +1,8 @@
-var myApp = require("./dbFunctions.js");
-var express = require("express");
-
-var app = express();
-
-var PORT = process.env.PORT || 8080;
+const myApp = require("./myApp.js");
+// Express.JS
+const express = require("express");
+const app = express();
+const PORT = process.env.PORT || 8080;
 
 // Parse request body as JSON
 app.use(express.urlencoded({ extended: true }));
@@ -14,5 +13,3 @@ app.listen(PORT, function() {
 });
 
 myApp.viewEmps();
-
-       
