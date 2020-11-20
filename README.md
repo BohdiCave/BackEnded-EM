@@ -1,7 +1,8 @@
 # BackEnded-EM
-
 A node.js CLI app using CRUD principles to manage an employee database. 
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+  
 ## Features
 
 ### Database
