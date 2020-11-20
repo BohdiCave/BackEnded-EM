@@ -1,4 +1,4 @@
-const myApp = require("./myApp.js");
+const myApp = require("./app/myApp.js");
 // Express.JS
 const express = require("express");
 const app = express();
