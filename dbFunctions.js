@@ -19,11 +19,13 @@ connection.connect(function(err) {
 
 // Checking if the Roles and Depts arrays are filled
 const fillArrays = () => {
-    if (rolesArray.length === 0 || deptsArray.length === 0) {
+    if (deptsArray.length === 0) {
         currentDeptList();
+        if (rolesArray.length === 0) {
+            currentRoleList();
+        }
+    } else if (rolesArray.length === 0) {
         currentRoleList();
-    } else {
-        return;
     }
 }
 
@@ -267,6 +269,7 @@ const createRole = () => {
                         else {
                             newRoleID = result.insertId;
                             console.log("\n\r" + result.affectedRows + " new title created: " + newRoleName + ", with ID " + newRoleID + " and salary " + newSal);
+                            currentRoleList();
                             next();
                         };
                     }
@@ -315,7 +318,7 @@ const updEmp = () => {
                     }
                 ])
                 .then(response => {
-                    if (name_yorn) {
+                    if (response.name_yorn) {
                         inquirer
                             .prompt([
                                 {
@@ -337,7 +340,7 @@ const updEmp = () => {
                                         message: "Do you want to update the employee's role as well?", name: "role_too_yorn"
                                     }
                                 ]).then(response => {
-                                    if (role_too_yorn) {
+                                    if (response.role_too_yorn) {
                                         updRole(empID);
                                     } else {
                                         next();
@@ -354,7 +357,7 @@ const updEmp = () => {
                                 }
                             ])
                             .then(response => {
-                                if (role_yorn) {
+                                if (response.role_yorn) {
                                     updRole(empID);
                                 } else {
                                     console.log("Looks like you don't need to update any information. You're returning to the main menu.");
@@ -389,7 +392,6 @@ const updName = (empID, firstName, lastName) => {
 
 // Employee Role
 const updRole = empID => {
-  let roleID;
   inquirer
     .prompt([
         {
@@ -423,9 +425,26 @@ const updRole = empID => {
             );
             next();
         } else {
-            console.log ("Employee role unknown - apologies for the inconvenience. Please return to this task later, when the records have been reviewed and fully updated. Thank you.")
-            next();
-        }
+            connection.query(
+                "SELECT roles.id FROM roles WHERE title = ?;", 
+                [response.new_role], 
+                (err, result) => { if(err) throw err;
+                    else { 
+                        console.log(result);
+                        connection.query(
+                            "UPDATE employees SET ? WHERE ?", 
+                            [{ role_id: result[0].id }, { id: empID }],
+                            (err, result) => {
+                                if(err) throw err;
+                                if(result.changedRows === 0) throw err;
+                                else { console.log("Role updated for employee " + empID); };
+                            }
+                        );
+                        next();
+                    }
+                }
+            );
+        }  
     });
 }
 
@@ -510,7 +529,10 @@ const delEmp = () => {
 }
 
 const delDept = () => {
-    connection.query("SELECT * FROM departments;", (err, result) => { if (err) throw err; console.log("Existing Departments", result); });
+    connection.query("SELECT * FROM departments;", (err, result) => { 
+        if (err) throw err; 
+        else {console.table("Existing Departments", result);}
+    });
     inquirer
         .prompt([
             {
@@ -531,25 +553,33 @@ const delDept = () => {
 }
 
 const delRole = () => {
-    connection.query("SELECT * from roles;", (err, result) => { if (err) throw err; console.log ("Existing Employee Roles", result); });
-    inquirer
-        .prompt([
-            {
-                type: "input",
-                message: "Please enter the ID of the record you wish to remove",
-                name: "removal_roleID"
-            }
-        ])
-        .then (response => {
-            connection.query("DELETE FROM roles WHERE id = ?;", [response.removal_roleID], (err, result) => {
-                if (err) throw err;
-                else if (result.affectedRows === 0) throw err;
-                else {
-                    console.log("Removed " + result.affectedRows + " employee role with ID " + response.removal_roleID);
+    connection.query("SELECT * from roles;", (err, result) => { 
+        if (err) throw err; 
+        else {
+            console.table("Existing Employee Roles", result); 
+            inquirer.prompt([
+                {
+                    type: "input",
+                    message: "Please enter the ID of the record you wish to remove",
+                    name: "removal_roleID"
                 }
-                viewRoles();
-            })
-        });
+            ])
+            .then (response => {
+                connection.query(
+                    "DELETE FROM roles WHERE id = ?;", 
+                    [response.removal_roleID], 
+                    (err, result) => {
+                        if (err) throw err;
+                        else if (result.affectedRows === 0) throw err;
+                        else {
+                            console.log("Removed " + result.affectedRows + " employee role with ID " + response.removal_roleID);
+                        }
+                        viewRoles();
+                    }
+                );
+            });
+        }
+    });
 }
 
-module.exports = {next, viewRecs, viewEmps, viewRoles, viewDepts, createRecs, addEmp, createDept, createRole, updEmp, updRole, updName, delRecs, delEmp, delRole, delDept}
+module.exports = {viewEmps}
